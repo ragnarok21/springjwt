@@ -40,7 +40,7 @@ public class User {
      * Roles are being eagerly loaded here because
      * they are a fairly small collection of items for this example.
      */
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "user_role", joinColumns
             = @JoinColumn(name = "user_id",
             referencedColumnName = "id"),

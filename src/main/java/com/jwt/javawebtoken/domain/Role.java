@@ -5,7 +5,6 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "app_role")
 @Getter
 @Setter
 public class Role {

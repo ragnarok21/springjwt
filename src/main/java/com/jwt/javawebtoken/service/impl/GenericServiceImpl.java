@@ -1,6 +1,7 @@
 package com.jwt.javawebtoken.service.impl;
 
 import com.google.common.hash.Hashing;
+import com.jwt.javawebtoken.dao.RoleDao;
 import com.jwt.javawebtoken.dao.UserDao;
 import com.jwt.javawebtoken.domain.Role;
 import com.jwt.javawebtoken.domain.User;
@@ -18,6 +19,9 @@ public class GenericServiceImpl implements GenericService{
 
     @Autowired
     private UserDao userRepository;
+
+    @Autowired
+    private RoleDao roleRepository;
 
     @Override
     public User findByUsername(String username) {
@@ -38,10 +42,9 @@ public class GenericServiceImpl implements GenericService{
             throw new UsernameException("Ya existe un usuario con ese username");
         }
 
+        Role role = roleRepository.getRoleByRoleName("STANDARD_USER");
+
         encryptPasswordSha(user);
-        Role role = new Role();
-        role.setDescription("Standard Role");
-        role.setRoleName("STANDARD_USER");
         user.setRoles(Arrays.asList(role));
 
         userRepository.save(user);
