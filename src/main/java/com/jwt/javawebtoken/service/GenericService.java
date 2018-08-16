@@ -9,4 +9,6 @@ public interface GenericService {
     User findByUsername(String username);
 
     List<User> findAllUsers();
+
+    void createUser(User user);
 }

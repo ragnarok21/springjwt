@@ -3,18 +3,19 @@ package com.jwt.javawebtoken.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "app_user")
 @Getter
 @Setter
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private Long id;
 
@@ -22,7 +23,7 @@ public class User {
     private String username;
 
     @Column(name = "password")
-    @JsonIgnore
+    @Length(min = 5)
     private String password;
 
     @Column(name = "first_name")
@@ -31,11 +32,15 @@ public class User {
     @Column(name = "last_name")
     private String lastName;
 
+    @Column(name = "email")
+    @Email
+    private String email;
+
     /**
      * Roles are being eagerly loaded here because
      * they are a fairly small collection of items for this example.
      */
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(name = "user_role", joinColumns
             = @JoinColumn(name = "user_id",
             referencedColumnName = "id"),
