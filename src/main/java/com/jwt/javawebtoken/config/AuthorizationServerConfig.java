@@ -2,12 +2,14 @@ package com.jwt.javawebtoken.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
@@ -36,6 +38,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Value("${security.jwt.resource-ids}")
     private String resourceIds;
 
+    @Value("${jwt.validity-session}")
+    private int validitySession;
+
     @Autowired
     private TokenStore tokenStore;
 
@@ -53,7 +58,8 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .secret(clientSecret)
                 .authorizedGrantTypes(grantType)
                 .scopes(scopeRead, scopeWrite)
-                .resourceIds(resourceIds);
+                .resourceIds(resourceIds)
+                .accessTokenValiditySeconds(validitySession);
     }
 
     @Override
@@ -62,8 +68,13 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         enhancerChain.setTokenEnhancers(Arrays.asList(accessTokenConverter));
         endpoints.tokenStore(tokenStore)
                 .accessTokenConverter(accessTokenConverter)
-                .tokenEnhancer(enhancerChain)
+                .tokenEnhancer(tokenEnhancer())
                 .authenticationManager(authenticationManager);
+    }
+
+    @Bean
+    public TokenEnhancer tokenEnhancer() {
+        return new CustomTokenEnhancer();
     }
 
 }

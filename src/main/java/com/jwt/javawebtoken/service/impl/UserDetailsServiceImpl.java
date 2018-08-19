@@ -1,11 +1,11 @@
 package com.jwt.javawebtoken.service.impl;
 
 import com.jwt.javawebtoken.dao.UserDao;
+import com.jwt.javawebtoken.domain.CustomUserDetails;
 import com.jwt.javawebtoken.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private UserDao userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
+    public CustomUserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(s);
 
         if(user == null) {
@@ -30,9 +30,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         List<GrantedAuthority> authorities = new ArrayList<>();
         user.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getRoleName())));
 
-        UserDetails userDetails = new org.springframework.security.core.userdetails.
-                User(user.getUsername(), user.getPassword(), authorities);
+       return  new CustomUserDetails(user.getUsername(), user.getPassword(),
+                user.getFirstName(), user.getLastName(), user.getEmail(),authorities);
 
-        return userDetails;
     }
 }
