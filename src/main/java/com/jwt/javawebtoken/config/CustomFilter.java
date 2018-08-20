@@ -22,7 +22,7 @@ public class CustomFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
 
-        if ("OPTIONS".equals(request.getMethod())) {
+        if ("OPTIONS".equals(request.getMethod()) ||  request.getServletPath().contains("/h2-console")) {
             response.setStatus(HttpServletResponse.SC_OK);
             filterChain.doFilter(request, response);
 

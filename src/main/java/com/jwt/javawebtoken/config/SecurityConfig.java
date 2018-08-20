@@ -68,8 +68,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .httpBasic()
                 .realmName(securityRealm)
                 .and()
-                .csrf()
-                .disable();
+                .headers()
+                .frameOptions().disable();
 
     }
 

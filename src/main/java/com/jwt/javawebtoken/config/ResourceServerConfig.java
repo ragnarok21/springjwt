@@ -33,7 +33,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .addFilterAfter(new CustomFilter(),BasicAuthenticationFilter.class)
                 .authorizeRequests()
                 .antMatchers("/actuator/**", "/api-docs/**",
-                        "/springjwt/register/login/**").permitAll()
+                        "/springjwt/register/login/**", "/springjwt/h2-console/**").permitAll()
                 .antMatchers("/springjwt/admin/**").hasAuthority("ADMIN_USER")
                 .antMatchers("/springjwt/register/logout/**" ).authenticated();
     }
