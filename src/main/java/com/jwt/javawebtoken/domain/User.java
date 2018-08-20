@@ -24,6 +24,7 @@ public class User {
 
     @Column(name = "password")
     @Length(min = 5)
+    @JsonIgnore
     private String password;
 
     @Column(name = "first_name")

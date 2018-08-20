@@ -2,18 +2,18 @@ package com.jwt.javawebtoken.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
-import org.springframework.security.oauth2.provider.token.TokenEnhancer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 
+import javax.sql.DataSource;
 import java.util.Arrays;
 
 @Configuration
@@ -42,6 +42,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     private int validitySession;
 
     @Autowired
+    private DataSource dataSource;
+
+    @Autowired
     private TokenStore tokenStore;
 
     @Autowired
@@ -53,13 +56,15 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Override
     public void configure(ClientDetailsServiceConfigurer configurer) throws Exception {
         configurer
-                .inMemory()
+                .jdbc(dataSource)
                 .withClient(clientId)
                 .secret(clientSecret)
                 .authorizedGrantTypes(grantType)
+                .authorities("ADMIN_USER", "STANDARD_USER")
                 .scopes(scopeRead, scopeWrite)
                 .resourceIds(resourceIds)
-                .accessTokenValiditySeconds(validitySession);
+                .accessTokenValiditySeconds(validitySession)
+                .refreshTokenValiditySeconds(validitySession);
     }
 
     @Override
@@ -68,13 +73,16 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         enhancerChain.setTokenEnhancers(Arrays.asList(accessTokenConverter));
         endpoints.tokenStore(tokenStore)
                 .accessTokenConverter(accessTokenConverter)
-                .tokenEnhancer(tokenEnhancer())
+                .tokenEnhancer(enhancerChain)
                 .authenticationManager(authenticationManager);
     }
 
-    @Bean
-    public TokenEnhancer tokenEnhancer() {
-        return new CustomTokenEnhancer();
+    @Override
+    public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
+        oauthServer
+                // we're allowing access to the token only for clients with 'ROLE_TRUSTED_CLIENT' authority
+                .tokenKeyAccess("hasAuthority('STANDARD_USER') || hasAuthority('ADMIN_USER')")
+                .checkTokenAccess("hasAuthority('STANDARD_USER') || hasAuthority('ADMIN_USER')");
     }
 
 }

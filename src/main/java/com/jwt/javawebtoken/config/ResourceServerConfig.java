@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
 @EnableResourceServer
@@ -29,9 +30,11 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         http
                 .requestMatchers()
                 .and()
+                .addFilterAfter(new CustomFilter(),BasicAuthenticationFilter.class)
                 .authorizeRequests()
-                .antMatchers("/actuator/**", "/api-docs/**", "/springjwt/login/**").permitAll()
+                .antMatchers("/actuator/**", "/api-docs/**",
+                        "/springjwt/register/login/**").permitAll()
                 .antMatchers("/springjwt/admin/**").hasAuthority("ADMIN_USER")
-                .antMatchers("/springjwt/users/**" ).authenticated();
+                .antMatchers("/springjwt/register/logout/**" ).authenticated();
     }
 }
