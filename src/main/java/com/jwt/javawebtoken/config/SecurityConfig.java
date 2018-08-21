@@ -3,8 +3,9 @@ package com.jwt.javawebtoken.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
@@ -25,9 +26,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
-@Configuration
+
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@Order(Ordered.HIGHEST_PRECEDENCE + 1)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Value("${security.signing-key}")
@@ -63,13 +65,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
+                .csrf()
+                .disable()
                 .cors()
                 .and()
                 .httpBasic()
                 .realmName(securityRealm)
                 .and()
                 .headers()
-                .frameOptions().disable();
+                .frameOptions().disable()
+                .httpStrictTransportSecurity().disable();
 
     }
 
@@ -98,9 +103,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("https://localhost:4200"));
+        configuration.setAllowedOrigins(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList( environment.getProperty("cors.request.allowed-methods")));
         configuration.setAllowedHeaders(Arrays.asList( environment.getProperty("cors.request.allowed-headers")));
+        configuration.setExposedHeaders(Arrays.asList(environment.getProperty("cors.request.expose-headers")));
         configuration.setAllowCredentials(Boolean.getBoolean(environment.getProperty("cors.request.allowed-credentials")));
         configuration.setMaxAge(Long.getLong(environment.getProperty("cors.request.allowed.max-age")));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

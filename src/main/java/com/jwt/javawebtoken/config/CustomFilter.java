@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Configuration
-@Order(Ordered.HIGHEST_PRECEDENCE + 1)
+@Order(Ordered.HIGHEST_PRECEDENCE + 2)
 public class CustomFilter extends OncePerRequestFilter {
 
     @Override
@@ -22,7 +22,7 @@ public class CustomFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
 
-        if ("OPTIONS".equals(request.getMethod()) ||  request.getServletPath().contains("/h2-console")) {
+        if ("OPTIONS".equals(request.getMethod()) ||  request.getServletPath().contains("/h2-console") || request.getServletPath().contains("/register/login")) {
             response.setStatus(HttpServletResponse.SC_OK);
             filterChain.doFilter(request, response);
 
